@@ -1,4 +1,4 @@
-public class Event {
+public class Event implements Comparable<Event> {
     private double time;
     private EventType type;
 
@@ -13,6 +13,11 @@ public class Event {
 
     public EventType getType() {
         return type;
+    }
+
+    @Override
+    public int compareTo(Event other) {
+        return Double.compare(this.time, other.time);
     }
 
 }
