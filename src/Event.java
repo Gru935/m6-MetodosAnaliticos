@@ -1,3 +1,5 @@
+package src;
+
 public class Event implements Comparable<Event> {
     private double time;
     private EventType type;

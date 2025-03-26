@@ -1,8 +1,11 @@
+package src;
+
 import java.util.PriorityQueue;
 
 public class Simulador {
     public static PriorityQueue<Event> scheduler = new PriorityQueue<>();
     public static final int capacity = 5;
+    public static final int servers = 2;
     public static int size = 0;
     public static double global_time = 0.0;
     public static double[] times = new double[capacity + 1];
@@ -55,7 +58,7 @@ public class Simulador {
         global_time = e.getTime();
         if (size < capacity) {
             size++;
-            if (size <= 1) {
+            if (size <= servers) {
                 scheduleExit();
             }
         } else {
@@ -68,7 +71,7 @@ public class Simulador {
         times[size] += e.getTime() - global_time;
         global_time = e.getTime();
         size--;
-        if (size >= 1) {
+        if (size >= servers) {
             scheduleExit();
         }
     }
