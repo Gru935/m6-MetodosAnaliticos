@@ -2,28 +2,20 @@ package src;
 
 import java.util.PriorityQueue;
 
-public class Simulador {
+public class Simulator {
     public static PriorityQueue<Event> scheduler = new PriorityQueue<>();
-    public static final int capacity = 5;
-    public static final int servers = 2;
-    public static int size = 0;
+    public static Queue queue;
     public static double global_time = 0.0;
-    public static double[] times = new double[capacity + 1];
-    public static int rounds = 100000;
-    public static final int arrival_a = 2;
-    public static final int arrival_b = 5;
-    public static final int exit_a = 3;
-    public static final int exit_b = 5;
     public static int x = 57406;
-    public static final int a = 4212002;
-    public static final int c = 2224621;
-    public static final int m = 429496729;
-    public static int losts = 0;
 
     public static void main(String[] args) {
-        Event first = new Event(2.0, EventType.ARRIVAL);
+        queue = new Queue(2, 3, 1, 4, 3, 4, 0, 0, null);
+        queue.setTimes(new double[queue.getCapacity() + 1]);
+
+        Event first = new Event(1.5, EventType.ARRIVAL);
         scheduler.add(first);
 
+        int rounds = 100000;
         while (rounds > 0) {
             Event event = nextEvent();
 
@@ -34,19 +26,21 @@ public class Simulador {
             }
             rounds--;
         }
+
         // Realizar os prints dos conteudos exigidos
         System.out.println("State   Time                  Probability");
-        for (int i = 0; i < times.length; i++) {
-            System.out.println(i + "       " + times[i] + "    " + times[i] / global_time * 100 + "%");
+        for (int i = 0; i < queue.getTimes().length; i++) {
+            System.out.println(
+                    i + "       " + queue.getTimes()[i] + "    " + queue.getTimes()[i] / global_time * 100 + "%");
         }
         System.out.println();
-        System.out.println("Number os losses: " + losts);
+        System.out.println("Number os losses: " + queue.getLosses());
         System.out.println("Global time: " + global_time);
     }
 
     public static double nextRandom() {
-        x = ((a * x) + c) % m;
-        return ((double) x) / m;
+        x = ((4212002 * x) + 2224621) % 429496729;
+        return ((double) x) / 429496729;
     }
 
     public static Event nextEvent() {
@@ -54,36 +48,36 @@ public class Simulador {
     }
 
     public static void arrival(Event e) {
-        times[size] += e.getTime() - global_time;
+        queue.getTimes()[queue.getCustomers()] += e.getTime() - global_time;
         global_time = e.getTime();
-        if (size < capacity) {
-            size++;
-            if (size <= servers) {
+        if (queue.getCustomers() < queue.getCapacity()) {
+            queue.In();
+            if (queue.getCustomers() <= queue.getServers()) {
                 scheduleExit();
             }
         } else {
-            losts++;
+            queue.Loss();
         }
         scheduleArrival();
     }
 
     public static void exit(Event e) {
-        times[size] += e.getTime() - global_time;
+        queue.getTimes()[queue.getCustomers()] += e.getTime() - global_time;
         global_time = e.getTime();
-        size--;
-        if (size >= servers) {
+        queue.Out();
+        if (queue.getCustomers() >= queue.getServers()) {
             scheduleExit();
         }
     }
 
     public static void scheduleArrival() {
-        double u = arrival_a + ((arrival_b - arrival_a) * nextRandom());
+        double u = queue.getMinArrival() + ((queue.getMaxArrival() - queue.getMinArrival()) * nextRandom());
         Event event = new Event(u + global_time, EventType.ARRIVAL);
         scheduler.add(event);
     }
 
     public static void scheduleExit() {
-        double u = exit_a + ((exit_b - exit_a) * nextRandom());
+        double u = queue.getMinService() + ((queue.getMaxService() - queue.getMinService()) * nextRandom());
         Event event = new Event(u + global_time, EventType.EXIT);
         scheduler.add(event);
     }
