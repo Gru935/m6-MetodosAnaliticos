@@ -1,5 +1,5 @@
 package src;
 
 public enum EventType {
-    ARRIVAL, EXIT
+    ARRIVAL, EXIT, PASS
 }
